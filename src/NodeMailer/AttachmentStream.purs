@@ -10,5 +10,5 @@ foreign import data AttachmentStream :: Type
 fromReadable :: forall r. Readable r -> AttachmentStream
 fromReadable = unsafeCoerce
 
-instance writeForeignReadFileStream :: WriteForeign AttachmentStream where
+instance WriteForeign AttachmentStream where
   writeImpl = unsafeToForeign

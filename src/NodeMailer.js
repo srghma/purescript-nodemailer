@@ -1,40 +1,33 @@
-'use strict';
+import nodemailer from 'nodemailer';
 
-import nodemailer from "nodemailer";
-
-export function createTransporterImpl(config) {
-  return nodemailer.createTransport(config);
-}
+export const createTransporterImpl = config => nodemailer.createTransport(config)
 
 export function sendMailImpl(message, transporter) {
-  return function(onError, onSuccess) {
-    transporter.sendMail(message, function(e, info) {
+  return function (onError, onSuccess) {
+    transporter.sendMail(message, function (e, info) {
       if (e) {
         onError(e);
       } else {
         onSuccess(info);
       }
     });
-    return function(cancelError, onCancelerError, onCancelerSuccess) {
-      onCancelerSuccess({});
+    return function (_cancelError, _onCancelerError, onCancelerSuccess) {
+      onCancelerSuccess();
     }
   }
 }
 
 export function createTestAccountImpl(onError, onSuccess) {
-  nodemailer.createTestAccount(function(e, account) {
+  nodemailer.createTestAccount(function (e, account) {
     if (e) {
       onError(e);
     } else {
       onSuccess(account);
     }
   });
-  return function(cancelError, onCancelerError, onCancelerSuccess) {
-    onCancelerSuccess({});
+  return function (_cancelError, _onCancelerError, onCancelerSuccess) {
+    onCancelerSuccess();
   }
 }
 
-export function getTestMessageUrlImpl(nothing, just, info) {
-  const result = nodemailer.getTestMessageUrl(info);
-  return !result ? nothing : just(result);
-}
+export const getTestMessageUrlImpl = info => nodemailer.getTestMessageUrl(info)

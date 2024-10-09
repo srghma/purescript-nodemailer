@@ -26,7 +26,7 @@ createMessage = do
     { from: "noreply@example.com"
     , to: [ "Recipient <recipient@example.com>" ]
     , cc: [ "CCRecipient <ccrecipient@example.com>" ]
-    , bcc: [ "BCCRecipient <bccrecipient@example.com>"]
+    , bcc: [ "BCCRecipient <bccrecipient@example.com>" ]
     , subject: "Test Subject"
     , text: "Go to https://github.com"
     , attachments:

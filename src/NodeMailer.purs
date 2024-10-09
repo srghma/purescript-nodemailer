@@ -13,8 +13,10 @@ module NodeMailer
 
 import Prelude
 
-import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
-import Data.Maybe (Maybe(..))
+import Data.Function.Uncurried (Fn2, runFn2)
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable)
+import Data.Nullable as Nullable
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
@@ -33,12 +35,18 @@ type TransportConfig =
   , port :: Int
   , secure :: Boolean
   , auth :: AuthConfig
+  , web :: String
+  , mxEnabled :: Boolean
   }
 
 type TestAccount =
   { user :: String
   , pass :: String
   , smtp :: { host :: String, port :: Int, secure :: Boolean }
+  , imap :: { host :: String, port :: Int, secure :: Boolean }
+  , pop3 :: { host :: String, port :: Int, secure :: Boolean }
+  , web :: String
+  , mxEnabled :: Boolean
   }
 
 type Message =
@@ -53,7 +61,17 @@ type Message =
 
 foreign import data Transporter :: Type
 
-foreign import data MessageInfo :: Type
+newtype MessageInfo = MessageInfo
+  { accepted :: Array String
+  , rejected :: Array String
+  , ehlo :: Array String
+  , envelopeTime :: Int
+  , messageTime :: Int
+  , messageSize :: Int
+  , response :: String
+  , envelope :: { from :: String , to :: Array String }
+  , messageId :: String
+  }
 
 createTransporter :: TransportConfig -> Effect Transporter
 createTransporter config = runEffectFn1 createTransporterImpl config
@@ -72,10 +90,12 @@ createTestAccount = do
     , port: account.smtp.port
     , secure: account.smtp.secure
     , auth: { user: account.user, pass: account.pass }
+    , web: account.web
+    , mxEnabled: account.mxEnabled
     }
 
 getTestMessageUrl :: MessageInfo -> Maybe String
-getTestMessageUrl = runFn3 getTestMessageUrlImpl Nothing Just
+getTestMessageUrl = Nullable.toMaybe <<< getTestMessageUrlImpl
 
 foreign import createTransporterImpl :: EffectFn1 TransportConfig Transporter
 
@@ -83,5 +103,4 @@ foreign import sendMailImpl :: Fn2 Foreign Transporter (EffectFnAff MessageInfo)
 
 foreign import createTestAccountImpl :: EffectFnAff TestAccount
 
-foreign import getTestMessageUrlImpl
-  :: Fn3 (Maybe String) (String -> Maybe String) MessageInfo (Maybe String)
+foreign import getTestMessageUrlImpl :: MessageInfo -> Nullable String
